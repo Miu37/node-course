@@ -12,13 +12,13 @@ let doWork = function(job, timer, cb) {
 
 doWork("刷牙", 3000, function(result){
     console.log(result);
+    doWork("吃早餐", 5000, function(result){
+        console.log(result);
+        doWork("寫功課", 3000, function(result){
+            console.log(result);
 });
 
-doWork("吃早餐", 8000, function(result){
-    console.log(result);
 });
 
-doWork("寫功課", 11000, function(result){
-    console.log(result);
 });
 
