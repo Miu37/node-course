@@ -2,7 +2,11 @@
 // 1. read stock no from file (fs)
 // 2. axios.get to request data
 
+
+//npm i axios 因為這是第三方模組
 const axios = require('axios');
+
+// fs 內建的模組不用安裝可直接使用
 const fs = require('fs').promises;
 
 
