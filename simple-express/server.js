@@ -8,6 +8,9 @@ const path = require('path');
 
 const mysql = require('mysql2');
 require('dotenv').config();
+
+const cors = require('cors');
+app.use(cors());
 // 這裡不會像爬蟲那樣，只建立一個連線 (mysql.createConnection)
 // 但是，也不會幫每一個 request 都分別建立連線
 // ----> connection pool
@@ -114,35 +117,35 @@ app.get('/stocks', async (req, res, next) => {
 });
 
 // 取得某個股票 id 的資料
-app.get('/stocks/:stockId', async (req, res, next) => {
-  // 取得網址上的參數 req.params
-  // req.params.stockId
-  console.log('get stocks by id', req.params);
-  let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id = ' + req.params.stockId);
+// app.get('/stocks/:stockId', async (req, res, next) => {
+//   // 取得網址上的參數 req.params
+//   // req.params.stockId
+//   console.log('get stocks by id', req.params);
+//   let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id = ' + req.params.stockId);
 
-  console.log('query stock by id:', data);
-  // 空資料(查不到資料)有兩種處理方式：
-  // 1. 200OK 就回 []
-  // 2. 回覆 404
-  if (data.length === 0) {
-    // 這裡是 404 範例
-    res.status(404).json(data);
-  } else {
-    res.json(data);
-  }
-});
-
-// app.get('/stocks/:stockName', async(req,res,next)=>{
-//   console.log('get stocks by name ', req.params);
-//   let[data, fields] = await pool.execute('SELECT * FROM stocks WHERE name =' + req.params.stockName);
-
-//   console.log('query stocks by Name:', data);
+//   console.log('query stock by id:', data);
+//   // 空資料(查不到資料)有兩種處理方式：
+//   // 1. 200OK 就回 []
+//   // 2. 回覆 404
 //   if (data.length === 0) {
+//     // 這裡是 404 範例
 //     res.status(404).json(data);
 //   } else {
 //     res.json(data);
 //   }
-// })
+// });
+
+app.get('/stocks/:stockName', async(req,res,next)=>{
+  console.log('get stocks by name ', req.params);
+  let[data, fields] = await pool.execute(`SELECT * FROM stocks WHERE name ='${req.params.stockName}'`);
+
+  console.log('query stocks by Name:', data);
+  if (data.length === 0) {
+    res.status(404).json(data);
+  } else {
+    res.json(data);
+  }
+})
 
 // 這個中間件在所有路由的後面
 // 會到這裡，表示前面所有的路由中間件都沒有比到符合的網址
