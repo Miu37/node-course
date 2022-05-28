@@ -12,9 +12,7 @@ const Stock = () => {
     };
     getStocks();
   }, []);
-  useEffect(()=>{
 
-  },[])
 
   return (
     <div>
