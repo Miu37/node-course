@@ -117,13 +117,13 @@ app.get('/stocks', async (req, res, next) => {
 });
 
 // 取得某個股票 id 的資料
-// app.get('/stocks/:stockId', async (req, res, next) => {
-//   // 取得網址上的參數 req.params
-//   // req.params.stockId
-//   console.log('get stocks by id', req.params);
-//   let [data, fields] = await pool.execute('SELECT * FROM stocks WHERE id = ' + req.params.stockId);
+app.get('/stocks/:stockId', async (req, res, next) => {
+  // 取得網址上的參數 req.params
+  // req.params.stockId
+  console.log('get stocks by id', req.params);
+  let [data, fields] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ?', [req.params.stockId]);
 
-//   console.log('query stock by id:', data);
+  console.log('query stock by id:', data);
 //   // 空資料(查不到資料)有兩種處理方式：
 //   // 1. 200OK 就回 []
 //   // 2. 回覆 404
@@ -133,19 +133,58 @@ app.get('/stocks', async (req, res, next) => {
 //   } else {
 //     res.json(data);
 //   }
-// });
 
-app.get('/stocks/:stockName', async(req,res,next)=>{
-  console.log('get stocks by name ', req.params);
-  let[data, fields] = await pool.execute(`SELECT * FROM stocks WHERE name ='${req.params.stockName}'`);
+// RESTful 風格之下,鼓勵把這種過濾參數用query string 來傳遞
+// /stocks/:stockId?page=1
+// 取得目前在第幾頁,而且利用 || 這個特性來做預設值
+// undefined 會是 false, 所以PAGE就被設定成 || 後面那個數字了
+let page = req.query.page || 1;
+console.log('current page', page); 
 
-  console.log('query stocks by Name:', data);
-  if (data.length === 0) {
-    res.status(404).json(data);
-  } else {
-    res.json(data);
-  }
+// TODO: 取得目前的總筆數
+let [allResults, field] = await pool.execute('SELECT * FROM stock_prices WHERE stock_id = ?', [req.params.stockId]);
+const total= allResults.length;
+console.log('total',total);
+
+// TODO: 計算總共有幾頁
+
+const perPage = 5;
+const totalPage = Math.ceil(total / perPage);
+console.log('totalPage', totalPage);
+
+// TODO: 取得 offset 是多少(計算要跳過幾筆)
+const offset = (page-1)*perPage;
+console.log(offset);
+
+// TODO: 取得這一頁的資料 select * ... limit ? offset ?
+
+// TODO: 回覆給前端
+
+
+
+
+res.json({
+  //用來儲存所有跟頁碼有關的資訊
+  pagination: {},
+  //真正的資料
+  data: data,
 })
+ });
+
+
+
+
+// app.get('/stocks/:stockName', async(req,res,next)=>{
+//   console.log('get stocks by name ', req.params);
+//   let[data, fields] = await pool.execute(`SELECT * FROM stocks WHERE name ='${req.params.stockName}'`);
+
+//   console.log('query stocks by Name:', data);
+//   if (data.length === 0) {
+//     res.status(404).json(data);
+//   } else {
+//     res.json(data);
+//   }
+// })
 
 // 這個中間件在所有路由的後面
 // 會到這裡，表示前面所有的路由中間件都沒有比到符合的網址
